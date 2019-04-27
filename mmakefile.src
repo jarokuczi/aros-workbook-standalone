@@ -1,0 +1,31 @@
+# Copyright © 2011, The AROS Development Team. All rights reserved.
+# $Id$
+
+include $(SRCDIR)/config/aros.cfg
+
+USER_CFLAGS := -D__NOLIBBASE__
+
+FILES := workbook workbook_intern \
+	 wbapp \
+	 wbwindow \
+	 wbvirtual \
+	 wbset \
+	 wbicon
+
+#MM- workbench-system : workbench-system-workbook
+
+%build_prog mmake=workbench-system-workbook \
+    progname=Workbook targetdir=$(AROS_SYSTEM) \
+    files="main $(FILES)" \
+    detach=no
+
+## For the 'workbook.resource' embedded commands
+USER_CFLAGS += -DAROS_ROM
+
+OBJDIR := $(OBJDIR).kernel
+
+%build_module mmake=kernel-workbook \
+  modname=workbook modtype=resource \
+  files="workbook_init $(FILES)"
+
+%common
