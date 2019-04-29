@@ -30,6 +30,7 @@
 #include "workbook_intern.h"
 #include "workbook_menu.h"
 #include "classes.h"
+#include "wbreq.h"
 
 #include <clib/boopsistubs.h>
 
@@ -921,6 +922,9 @@ static IPTR WBWindowMenuPick(Class *cl, Object *obj, struct wbwm_MenuPick *wbwmp
     case WBMENU_ID(WBMENU_WB_SHELL):
     	NewCLI(cl, obj);
     	break;
+    case WBMENU_ID(WBMENU_WB_EXECUTE):
+        RequestText("Execute Command", "Command", "Execute", wb);
+        break;
     case WBMENU_ID(WBMENU_WB_ABOUT):
         About(cl, obj);
     case WBMENU_ID(WBMENU_IC_OPEN):
@@ -981,7 +985,7 @@ static IPTR WBWindowIntuiTick(Class *cl, Object *obj, Msg msg)
 	val[4] = AvailMem(MEMF_ANY) / 1024;
 
 	/* Update the window's title */
-	RawDoFmt("Workbook %ld.%ld  Chip: %ldk, Fast: %ldk, Any: %ldk", (RAWARG)val, 
+	RawDoFmt("Workbook NG %ld.%ld  Chip: %ldk, Fast: %ldk, Any: %ldk", (RAWARG)val,
 		 RAWFMTFUNC_STRING, my->ScreenTitle);
 
 	SetWindowTitles(my->Window, (CONST_STRPTR)-1, my->ScreenTitle);
