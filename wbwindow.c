@@ -860,6 +860,14 @@ static void About(Class *cl, Object *obj) {
 
     EasyRequest(my->Window,&aboutES,NULL);
 }
+
+static void ExecuteCommand(struct WorkbookBase *wb) {
+    char *commandToExecute = RequestText("Execute Command", "Command", "Execute", wb);
+    if (strlen(commandToExecute)>0) {
+        Execute(commandToExecute, BNULL, BNULL);
+    }
+}
+
 static void NewCLI(Class *cl, Object *obj)
 {
     struct WorkbookBase *wb = (APTR)cl->cl_UserData;
@@ -923,7 +931,7 @@ static IPTR WBWindowMenuPick(Class *cl, Object *obj, struct wbwm_MenuPick *wbwmp
     	NewCLI(cl, obj);
     	break;
     case WBMENU_ID(WBMENU_WB_EXECUTE):
-        RequestText("Execute Command", "Command", "Execute", wb);
+        ExecuteCommand(wb);
         break;
     case WBMENU_ID(WBMENU_WB_ABOUT):
         About(cl, obj);

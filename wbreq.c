@@ -25,12 +25,12 @@ void errorMessage(STRPTR error)
 }
 
 BOOL handleGadgetEvent(struct Window *win, struct Gadget *gad, UWORD code,
-                       WORD *slider_level, struct Gadget *my_gads[])
+                       struct Gadget *my_gads[])
 {
     switch (gad->GadgetID) {
         case GAD_TEXT:
-            sprintf(toReturnBuffer, "%s", ((struct StringInfo *)gad->SpecialInfo)->Buffer);
         case GAD_PROCEED:
+            toReturnBuffer =  ((struct StringInfo *) my_gads[GAD_TEXT]->SpecialInfo)->Buffer;
             return TRUE;
         case GAD_CANCEL:
             return TRUE;
@@ -84,8 +84,7 @@ struct Gadget *createAllGadgets(struct Gadget **glistptr, void *vi, UWORD topbor
 }
 
 
-VOID process_window_events(struct Window *mywin,
-                           WORD *slider_level, struct Gadget *my_gads[])
+VOID process_window_events(struct Window *mywin, struct Gadget *my_gads[])
 {
     struct IntuiMessage *imsg;
     ULONG imsgClass;
@@ -113,8 +112,9 @@ VOID process_window_events(struct Window *mywin,
 
                 case IDCMP_GADGETDOWN:
                 case IDCMP_MOUSEMOVE:
+                case IDCMP_VANILLAKEY:
                 case IDCMP_GADGETUP:
-                    terminated = handleGadgetEvent(mywin, gad, imsgCode, slider_level, my_gads);
+                    terminated = handleGadgetEvent(mywin, gad, imsgCode, my_gads);
                     break;
                 case IDCMP_CLOSEWINDOW:
                     terminated = TRUE;
@@ -134,9 +134,8 @@ void gadtoolsWindow(struct TextAttr * textAttr, char *windowTitle[] , char *inpu
     struct TextFont *font;
     struct Screen   *mysc;
     struct Window   *mywin;
-    struct Gadget   *glist, *my_gads[4];
+    struct Gadget   *glist, *my_gads[3];
     void            *vi;
-    WORD            slider_level = 5;
     UWORD           topborder;
 
     if (NULL == (font = OpenFont(textAttr)))
@@ -176,7 +175,7 @@ void gadtoolsWindow(struct TextAttr * textAttr, char *windowTitle[] , char *inpu
                     {
                        GT_RefreshWindow(mywin, NULL);
 
-                        process_window_events(mywin, &slider_level, my_gads);
+                        process_window_events(mywin, my_gads);
 
                         CloseWindow(mywin);
                     }
@@ -195,6 +194,5 @@ char *RequestText(char windowTitle[], char inputLabel[], char buttonTitle[], str
     gfxBase = wbBase->wb_GfxBase;
     struct TextAttr font = { gfxBase->DefaultFont->tf_Message.mn_Node.ln_Name, 8, 0, 0, };
     gadtoolsWindow(&font, &windowTitle, &inputLabel, &buttonTitle);
-    printf("Requested value: %s\n", toReturnBuffer);
     return toReturnBuffer;
 }
