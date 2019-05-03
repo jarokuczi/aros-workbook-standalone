@@ -8,7 +8,7 @@
 
 #define DEBUG 0
 #include <aros/debug.h>
-
+#include <stdio.h>
 #include <string.h>
 #include <limits.h>
 
@@ -28,6 +28,12 @@
 #include "workbook_menu.h"
 #include "classes.h"
 
+struct wbWindowListElement {
+    struct wbWindowListElement *next;
+    char *path;
+    Object *win;
+};
+
 struct wbApp {
     struct MsgPort *WinPort;
     ULONG           WinMask;   /* Mask of our port(s) */
@@ -37,19 +43,66 @@ struct wbApp {
     struct MinList  Windows; /* Subwindows */
 };
 
+struct wbWindowListElement *openedWindows;
+
+struct wbWindowListElement *lastOpenedWindow;
+
+static Object *findOpenedWindow(CONST_STRPTR path);
+
+static void addOppenedWindow(Object *pInt, char *path);
+
 static void wbOpenDrawer(Class *cl, Object *obj, CONST_STRPTR path)
 {
     struct WorkbookBase *wb = (APTR)cl->cl_UserData;
     struct wbApp *my = INST_DATA(cl, obj);
-    Object *win;
+    Object *win = findOpenedWindow(path);
 
-    win = NewObject(WBWindow, NULL, 
-                        WBWA_UserPort, my->WinPort,
-                        WBWA_Path, path,
-                        TAG_END);
+    if (win == NULL)  {
+        win = NewObject(WBWindow, NULL,
+                            WBWA_UserPort, my->WinPort,
+                            WBWA_Path, path,
+                            TAG_END);
 
-    if (win)
-    	DoMethod(obj, OM_ADDMEMBER, win);
+        if (win)
+            DoMethod(obj, OM_ADDMEMBER, win);
+            addOppenedWindow(win, (char *)path);
+    } else {
+
+        struct Window * window;
+        DoMethod(win, OM_GET, WBWA_Window, &window);
+        WindowToFront(window);
+        ActivateWindow(window);
+    }
+
+}
+
+static void addOppenedWindow(Object *pInt, char *path) {
+    extern struct wbWindowListElement *lastOpenedWindow;
+    lastOpenedWindow->next = AllocMem(sizeof(struct wbWindowListElement), MEMF_ANY|MEMF_CLEAR);
+    lastOpenedWindow->next->win = pInt;
+    lastOpenedWindow->next->path = AllocMem(strlen(path), MEMF_ANY|MEMF_CLEAR);
+    strcpy(lastOpenedWindow->next->path, path);
+    lastOpenedWindow = lastOpenedWindow->next;
+    printf("test %s\n", openedWindows->next->path);
+}
+
+static Object *findOpenedWindow(CONST_STRPTR path) {
+    extern struct wbWindowListElement *openedWindows;
+    if (openedWindows == NULL) {
+        printf("initializing the list\n");
+        openedWindows = AllocMem(sizeof(struct wbWindowListElement), MEMF_ANY|MEMF_CLEAR);
+        lastOpenedWindow = openedWindows;
+    }
+    struct wbWindowListElement *next = openedWindows->next;
+    while (next) {
+        printf("searching for %s in %s\n", path, next->path);
+        if (strcmp(next->path, path)==0) {
+            printf("found %s\n", path);
+            return next->win;
+        }
+        next = next->next;
+    }
+    return NULL;
 }
 
 // OM_NEW
