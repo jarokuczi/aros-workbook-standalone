@@ -51,6 +51,8 @@ static Object *findOpenedWindow(CONST_STRPTR path);
 
 static void addOppenedWindow(Object *pInt, char *path);
 
+static void attemptToRemoveWindowFromOppenedWindows(Object *pInt);
+
 static void wbOpenDrawer(Class *cl, Object *obj, CONST_STRPTR path)
 {
     struct WorkbookBase *wb = (APTR)cl->cl_UserData;
@@ -79,11 +81,12 @@ static void wbOpenDrawer(Class *cl, Object *obj, CONST_STRPTR path)
 static void addOppenedWindow(Object *pInt, char *path) {
     extern struct wbWindowListElement *lastOpenedWindow;
     lastOpenedWindow->next = AllocMem(sizeof(struct wbWindowListElement), MEMF_ANY|MEMF_CLEAR);
+    lastOpenedWindow->next->next = NULL;
     lastOpenedWindow->next->win = pInt;
     lastOpenedWindow->next->path = AllocMem(strlen(path), MEMF_ANY|MEMF_CLEAR);
     strcpy(lastOpenedWindow->next->path, path);
     lastOpenedWindow = lastOpenedWindow->next;
-    printf("test %s\n", openedWindows->next->path);
+    printf("Opening window for path %s\n", path);
 }
 
 static Object *findOpenedWindow(CONST_STRPTR path) {
@@ -241,9 +244,36 @@ static void wbCloseWindow(Class *cl, Object *obj, struct Window *win)
     Object *owin;
 
     if ((owin = wbLookupWindow(cl, obj, win))) {
+
     	DoMethod(obj, OM_REMMEMBER, owin);
+    	attemptToRemoveWindowFromOppenedWindows(owin);
     	DisposeObject(owin);
     }
+}
+
+static void attemptToRemoveWindowFromOppenedWindows(Object *pInt) {
+    extern struct wbWindowListElement *openedWindows;
+    extern struct wbWindowListElement *lastOpenedWindow;
+    struct wbWindowListElement *prev = openedWindows;
+    struct wbWindowListElement *next = openedWindows->next;
+    while (next) {
+        if (next->win == pInt) {
+            struct wbWindowListElement *current = next;
+            if (current == lastOpenedWindow) {
+                lastOpenedWindow = prev;
+            }
+            next = next->next;
+            if (next) {
+                prev->next = next;
+            }
+            FreeMem(current, sizeof(current));
+            printf("Window removed\n");
+            break;
+        }
+        prev = next;
+        next = next->next;
+    }
+
 }
 
 static BOOL wbMenuPick(Class *cl, Object *obj, struct Window *win, UWORD menuNumber)
