@@ -3,29 +3,30 @@
 
 include $(SRCDIR)/config/aros.cfg
 
-USER_CFLAGS := -D__NOLIBBASE__
+USER_CFLAGS :=
 
 FILES := workbook workbook_intern \
 	 wbapp \
 	 wbwindow \
 	 wbvirtual \
 	 wbset \
-	 wbicon
+	 wbicon \
+	 wbreq
 
 #MM- workbench-system : workbench-system-workbook
 
 %build_prog mmake=workbench-system-workbook \
-    progname=Workbook targetdir=$(AROS_SYSTEM) \
+    progname=WorkbookNG targetdir=$(AROS_SYSTEM) \
     files="main $(FILES)" \
     detach=no
 
 ## For the 'workbook.resource' embedded commands
-USER_CFLAGS += -DAROS_ROM
+# USER_CFLAGS += -DAROS_ROM
 
-OBJDIR := $(OBJDIR).kernel
+# OBJDIR := $(OBJDIR).kernel
 
-%build_module mmake=kernel-workbook \
-  modname=workbook modtype=resource \
-  files="workbook_init $(FILES)"
+# %build_module mmake=kernel-workbook \
+#  modname=workbook modtype=resource \
+#  files="workbook_init $(FILES)"
 
 %common
