@@ -6,7 +6,7 @@
     Lang: english
 */
 
-#define DEBUG 0
+#define DEBUG 1
 #include <aros/debug.h>
 
 #include <string.h>
@@ -33,6 +33,7 @@
 #include "wbreq.h"
 
 #include <clib/boopsistubs.h>
+#include <stdio.h>
 
 static inline WORD max(WORD a, WORD b)
 {
@@ -174,6 +175,8 @@ AROS_UFH3(ULONG, wbFilterIcons_Hook,
     AROS_USERFUNC_INIT
     int i;
 
+    D(bug("Icons Only Found file: %s\n",&ead->ed_Name));
+
     if (stricmp(ead->ed_Name, "disk.info") == 0)
         return FALSE;
 
@@ -199,6 +202,8 @@ AROS_UFH3(ULONG, wbFilterAll_Hook,
     AROS_USERFUNC_INIT
 
     int i;
+
+    D(bug("All Found file: %s\n",&ead->ed_Name));
 
     if (stricmp(ead->ed_Name, "disk.info") == 0)
         return FALSE;
@@ -306,6 +311,7 @@ static void wbAddFiles(Class *cl, Object *obj)
 		    Object *iobj;
 		    path[file_part] = 0;
 		    if (AddPart(path, tmp->ed_Name, 1024)) {
+            D(bug("Found item: %s\n", path));
 		        iobj = NewObject(WBIcon, NULL,
 		                WBIA_File, path,
 		                WBIA_Label, tmp->ed_Name,

@@ -6,7 +6,7 @@
     Lang: english
 */
 
-#define DEBUG 0
+#define DEBUG 1
 #include <aros/debug.h>
 #include <stdio.h>
 #include <string.h>
@@ -86,21 +86,21 @@ static void addOppenedWindow(Object *pInt, char *path) {
     lastOpenedWindow->next->path = AllocMem(strlen(path), MEMF_ANY|MEMF_CLEAR);
     strcpy(lastOpenedWindow->next->path, path);
     lastOpenedWindow = lastOpenedWindow->next;
-    printf("Opening window for path %s\n", path);
+    D(bug("Opening window for path %s\n", path));
 }
 
 static Object *findOpenedWindow(CONST_STRPTR path) {
     extern struct wbWindowListElement *openedWindows;
     if (openedWindows == NULL) {
-        printf("initializing the list\n");
+        D(bug("Initializing the window list\n"));
         openedWindows = AllocMem(sizeof(struct wbWindowListElement), MEMF_ANY|MEMF_CLEAR);
         lastOpenedWindow = openedWindows;
     }
     struct wbWindowListElement *next = openedWindows->next;
     while (next) {
-        printf("searching for %s in %s\n", path, next->path);
+        D(bug("Searching for %s in %s\n", path, next->path));
         if (strcmp(next->path, path)==0) {
-            printf("found %s\n", path);
+            D(bug("Found %s\n", path));
             return next->win;
         }
         next = next->next;
@@ -266,8 +266,8 @@ static void attemptToRemoveWindowFromOppenedWindows(Object *pInt) {
             if (next) {
                 prev->next = next;
             }
+            D(bug("Window %s removed\n", current->path));
             FreeMem(current, sizeof(current));
-            printf("Window removed\n");
             break;
         }
         prev = next;
@@ -405,7 +405,7 @@ static IPTR WBAppWorkbench(Class *cl, Object *obj, Msg msg)
 
     	    	im = GT_GetIMsg(my->WinPort);
 
-    	    	D(bug("im=%p, Class=%d, Code=%d\n", im, im->Class, im->Code));
+    	    	//D(bug("im=%p, Class=%d, Code=%d\n", im, im->Class, im->Code));
     	    	switch (im->Class) {
     	    	case IDCMP_CLOSEWINDOW:
     	    	    /* Dispose the window */
