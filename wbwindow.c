@@ -66,6 +66,13 @@ struct wbWindow {
 
     ULONG          Flags;
     IPTR           Tick;
+    /* Last MEMF_ANY, to reduce flicker when memory use stays same.
+     * Keeping MEMF_ANY is probably enough, as it would only miss when
+     * releasing X amuonts of chip and allocating identical amount of
+     * fast memory (or vice versa) is unlikely to happen, and it is
+     * "just" information anyway.
+     */
+    ULONG          LastMemAny;
 
     /* Temporary path buffer */
     TEXT           PathBuffer[PATH_MAX];
@@ -992,11 +999,14 @@ static IPTR WBWindowIntuiTick(Class *cl, Object *obj, Msg msg)
 	val[3] = AvailMem(MEMF_FAST) / 1024;
 	val[4] = AvailMem(MEMF_ANY) / 1024;
 
-	/* Update the window's title */
-	RawDoFmt("Workbook NG %ld.%ld  Chip: %ldk, Fast: %ldk, Any: %ldk", (RAWARG)val,
-		 RAWFMTFUNC_STRING, my->ScreenTitle);
+	if (val[4] != my->LastMemAny) {
+	  /* Update the window's title, when relevant, avoiding flicker */
+	  RawDoFmt("Workbook NG %ld.%ld  Chip: %ldk, Fast: %ldk, Any: %ldk", (RAWARG)val,
+		   RAWFMTFUNC_STRING, my->ScreenTitle);
 
-	SetWindowTitles(my->Window, (CONST_STRPTR)-1, my->ScreenTitle);
+	  SetWindowTitles(my->Window, (CONST_STRPTR)-1, my->ScreenTitle);
+	  my->LastMemAny = val[4];
+	}
 	rc = TRUE;
     }
 
