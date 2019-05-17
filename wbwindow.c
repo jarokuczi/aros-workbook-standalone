@@ -30,7 +30,7 @@
 #include "workbook_intern.h"
 #include "workbook_menu.h"
 #include "classes.h"
-#include "wbreq.h"
+#include "library/wbreq.h"
 
 #include <clib/boopsistubs.h>
 #include <stdio.h>
@@ -318,7 +318,7 @@ static void wbAddFiles(Class *cl, Object *obj)
 		    Object *iobj;
 		    path[file_part] = 0;
 		    if (AddPart(path, tmp->ed_Name, 1024)) {
-            D(bug("Found item: %s\n", path));
+            D(bug("Found item: %s %s\n", path, tmp->ed_Name));
 		        iobj = NewObject(WBIcon, NULL,
 		                WBIA_File, path,
 		                WBIA_Label, tmp->ed_Name,

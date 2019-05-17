@@ -1,4 +1,4 @@
-# Copyright © 2011, The AROS Development Team. All rights reserved.
+# Copyright ï¿½ 2011, The AROS Development Team. All rights reserved.
 # $Id$
 
 include $(SRCDIR)/config/aros.cfg
@@ -13,9 +13,9 @@ FILES := workbook workbook_intern \
 	 wbicon \
 	 wbreq
 
-#MM- workbench-system : workbench-system-workbook
+#MM- workbook-ng
 
-%build_prog mmake=workbench-system-workbook \
+%build_prog mmake=workbook-ng \
     progname=WorkbookNG targetdir=$(AROS_SYSTEM) \
     files="main $(FILES)" \
     detach=no

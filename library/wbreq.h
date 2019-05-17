@@ -5,7 +5,7 @@
 #ifndef WORKBOOK_WBREQ_H
 #define WORKBOOK_WBREQ_H
 
-#include "workbook_intern.h"
+#include "../workbook_intern.h"
 
 #define GAD_TEXT    (0)
 #define GAD_PROCEED    (1)

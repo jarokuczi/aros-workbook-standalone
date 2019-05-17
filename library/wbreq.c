@@ -2,6 +2,8 @@
 // Created by jarokuczi on 28/04/2019.
 //
 
+#define DEBUG 1
+#include <aros/debug.h>
 #include <intuition/intuition.h>
 #include <intuition/gadgetclass.h>
 #include <libraries/gadtools.h>
@@ -21,7 +23,7 @@ char *toReturnBuffer;
 void errorMessage(STRPTR error)
 {
     if (error)
-        printf("Error: %s\n", error);
+        D(bug("Error: %s\n", error));
 }
 
 BOOL handleGadgetEvent(struct Window *win, struct Gadget *gad, UWORD code,
@@ -194,5 +196,6 @@ char *RequestText(char windowTitle[], char inputLabel[], char buttonTitle[], str
     gfxBase = wbBase->wb_GfxBase;
     struct TextAttr font = { gfxBase->DefaultFont->tf_Message.mn_Node.ln_Name, 8, 0, 0, };
     gadtoolsWindow(&font, &windowTitle, &inputLabel, &buttonTitle);
+    D(bug("[WorkBook] WBReq user input: %s\n", toReturnBuffer));
     return toReturnBuffer;
 }

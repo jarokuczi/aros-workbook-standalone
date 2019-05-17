@@ -1,0 +1,18 @@
+# Copyright � 2011, The AROS Development Team. All rights reserved.
+# $Id$
+
+include $(SRCDIR)/config/aros.cfg
+
+USER_CFLAGS :=
+
+FILES := WorkbookNg \
+     wbreq
+
+#MM- workbook-ng-library
+
+%build_module mmake=workbook-ng-library \
+    modname=WorkbookNg \
+    modtype=library \
+    files=$(FILES)
+
+%common
